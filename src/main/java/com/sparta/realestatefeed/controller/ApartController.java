@@ -49,7 +49,7 @@ public class ApartController {
      */
     @GetMapping
     public ResponseEntity<CommonDto<List<ApartResponseDto>>> getAparts(@RequestParam(required = false) String area,
-                                                                       @RequestParam(defaultValue = "1") int page,
+                                                                        @RequestParam(defaultValue = "1") int page,
                                                                        @RequestParam(defaultValue = "5") int size) {
         page = page > 0 ? page - 1 : 0;
         CommonDto<List<ApartResponseDto>> responseDtos = apartService.getAparts(area, page, size);

@@ -3,9 +3,13 @@ package com.sparta.realestatefeed.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "QNA")
 @NoArgsConstructor
 public class QnA extends Timestamped {
@@ -29,10 +33,19 @@ public class QnA extends Timestamped {
     @JoinColumn(name = "apart_id")
     private Apart apart;
 
+    private Long likes;
+
+    @OneToMany(mappedBy = "qna", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<LikeQnA> likeQnAS;
+
     public QnA(String content, User user, Apart apart) {
         this.content = content;
         this.user = user;
         this.apart = apart;
+    }
+
+    public void updatelikes(Long num){
+        this.likes += num;
     }
 
     public void changeContent(String content){
