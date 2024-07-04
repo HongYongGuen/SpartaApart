@@ -1,6 +1,8 @@
 package com.sparta.realestatefeed.service;
 
 
+import com.sparta.realestatefeed.dto.ApartResponseDto;
+import com.sparta.realestatefeed.dto.QnAResponseDto;
 import com.sparta.realestatefeed.entity.*;
 import com.sparta.realestatefeed.exception.PostNotFoundException;
 import com.sparta.realestatefeed.exception.QnANotFoundException;
@@ -9,6 +11,10 @@ import com.sparta.realestatefeed.repository.ApartRepository;
 import com.sparta.realestatefeed.repository.LikeApartRepository;
 import com.sparta.realestatefeed.repository.LikeQnARepository;
 import com.sparta.realestatefeed.repository.QnARepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +54,7 @@ public class LikeService {
             if(apartOptional.isEmpty()) {
 
 
-                throw new PostNotFoundException("선택된 뉴스피드는 존재하지 않습니다."); // 예외 처리로 수정
+                throw new PostNotFoundException("선택된 뉴스피드는 존재하지 않습니다.");
             }
             Optional<LikeApart> existingLike = likeApartRepository.findByUserIdAndId(userId, contentId);
             if (existingLike.isPresent()) {
@@ -63,7 +69,7 @@ public class LikeService {
         }else{
             QnA qnA = qnARepository.findById(contentId).orElseThrow(() -> new QnANotFoundException("선택된 댓글은 존재하지 않습니다."));
 
-            Optional<LikeQnA> existingLike = likeQnARepository.findByUserIdAndCommentId(userId, contentId);
+            Optional<LikeQnA> existingLike = likeQnARepository.findByUserAndId(user, contentId);
             if (existingLike.isPresent()) {
                 qnA.updatelikes(-1L);
                 likeQnARepository.delete(existingLike.get());
@@ -76,15 +82,28 @@ public class LikeService {
             }
         }
 
-
-
     }
 
+    @Transactional(readOnly = true)
+    public Page<ApartResponseDto> getLikedAparts(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Apart> likedAparts = apartRepository.findByUserLikes(userId, pageable);
+        return likedAparts.map(ApartResponseDto::new);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<QnAResponseDto> getLikedQnAs(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<QnA> likedQnAs = qnARepository.findByUserLikes(userId, pageable);
+        return likedQnAs.map(QnAResponseDto::new);
+    }
+
+
     private boolean checkOwnContent(Long userId, Long contentId, ContentTypeEnum contentType) {
-        //.내부 정보 확인해서 본인이 만든 게시물인지 확인
+
         if(contentType == ContentTypeEnum.APART_TYPE) {
             Optional<Apart> apartOptional = apartRepository.findById(contentId);
-            if (apartOptional.get().getUser().getId()==userId) {
+            if (apartOptional.get().getUser().getId().equals(userId)) {
                 return true;
             }
         }else{
@@ -95,5 +114,6 @@ public class LikeService {
         }
         return false;
     }
+
 
 }

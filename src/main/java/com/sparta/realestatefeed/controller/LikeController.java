@@ -1,18 +1,18 @@
 package com.sparta.realestatefeed.controller;
 
 
+import com.sparta.realestatefeed.dto.ApartResponseDto;
+import com.sparta.realestatefeed.dto.QnAResponseDto;
 import com.sparta.realestatefeed.entity.ContentTypeEnum;
 import com.sparta.realestatefeed.entity.User;
 import com.sparta.realestatefeed.security.UserDetailsImpl;
 import com.sparta.realestatefeed.service.LikeService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
@@ -53,6 +53,22 @@ public class LikeController {
         } catch (Exception e) {
             return new ResponseEntity<>("좋아요 토글 실패", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/api/likedAparts")
+    public ResponseEntity<Page<ApartResponseDto>> getLikedAparts(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                 @RequestParam(defaultValue = "0") int page,
+                                                                 @RequestParam(defaultValue = "5") int size) {
+        Page<ApartResponseDto> likedAparts = likeService.getLikedAparts(userDetails.getUser().getId(), page, size);
+        return new ResponseEntity<>(likedAparts, HttpStatus.OK);
+    }
+
+    @GetMapping("/api/likedQnAs")
+    public ResponseEntity<Page<QnAResponseDto>> getLikedQnAs(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                               @RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "5") int size) {
+        Page<QnAResponseDto> likedQnAs = likeService.getLikedQnAs(userDetails.getUser().getId(), page, size);
+        return new ResponseEntity<>(likedQnAs, HttpStatus.OK);
     }
 
 
