@@ -14,7 +14,7 @@ public class LikeApart extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "like_id")
+    @Column(name = "likeApart_id")
     private Long id;
 
 

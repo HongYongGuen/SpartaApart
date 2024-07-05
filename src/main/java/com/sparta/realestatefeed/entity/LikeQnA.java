@@ -11,7 +11,7 @@ import lombok.Setter;
 public class LikeQnA {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "likeN_id")
+    @Column(name = "likeQnA_id")
     private Long id;
 
     @ManyToOne
@@ -19,7 +19,7 @@ public class LikeQnA {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "newsfeed_id")
+    @JoinColumn(name = "qna_id")
     private QnA qna;
 
     public LikeQnA(User user, QnA qna) {

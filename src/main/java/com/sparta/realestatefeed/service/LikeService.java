@@ -39,6 +39,8 @@ public class LikeService {
         this.apartRepository = apartRepository;
     }
 
+
+
     @Transactional
     public void likeOrUnlike(User user, Long contentId, ContentTypeEnum contentType) {
 

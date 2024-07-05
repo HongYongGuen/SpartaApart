@@ -6,6 +6,7 @@ import com.sparta.realestatefeed.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface LikeQnARepository extends JpaRepository<LikeQnA, Long> {
@@ -13,4 +14,11 @@ public interface LikeQnARepository extends JpaRepository<LikeQnA, Long> {
 
     @Query("SELECT COUNT(l) FROM LikeQnA l WHERE l.user.id = :userId")
     Long countByUserId(Long userId);
+
+    List<LikeQnA> findAllByUser(User user);
+
+    Object findByUser(User mockUser);
+
+
+    Object findByUserIdAndId(long userId, long qnaId);
 }

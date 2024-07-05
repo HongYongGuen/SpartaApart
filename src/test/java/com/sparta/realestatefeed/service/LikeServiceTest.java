@@ -1,9 +1,6 @@
 package com.sparta.realestatefeed.service;
 
-import com.sparta.realestatefeed.dto.ApartResponseDto;
 import com.sparta.realestatefeed.entity.*;
-import com.sparta.realestatefeed.exception.PostNotFoundException;
-import com.sparta.realestatefeed.exception.QnANotFoundException;
 import com.sparta.realestatefeed.exception.SelfPostLikeException;
 import com.sparta.realestatefeed.repository.ApartRepository;
 import com.sparta.realestatefeed.repository.LikeApartRepository;
@@ -11,12 +8,10 @@ import com.sparta.realestatefeed.repository.LikeQnARepository;
 import com.sparta.realestatefeed.repository.QnARepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,19 +19,24 @@ import static org.mockito.Mockito.*;
 
 class LikeServiceTest {
 
+    @Mock
     private LikeApartRepository likeApartRepository;
+    @Mock
     private LikeQnARepository likeQnARepository;
+    @Mock
     private QnARepository qnARepository;
+    @Mock
     private ApartRepository apartRepository;
+
+    @Mock
+    private User user;
+
+    @InjectMocks
     private LikeService likeService;
 
     @BeforeEach
     void setUp() {
-        likeApartRepository = mock(LikeApartRepository.class);
-        likeQnARepository = mock(LikeQnARepository.class);
-        qnARepository = mock(QnARepository.class);
-        apartRepository = mock(ApartRepository.class);
-        likeService = new LikeService(likeApartRepository, likeQnARepository, qnARepository, apartRepository);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -47,11 +47,24 @@ class LikeServiceTest {
         apart.setId(1L);
         apart.setUser(user);
 
-        when(apartRepository.findFirstById(1L)).thenReturn(Optional.of(apart));
-        when(likeApartRepository.findByUserIdAndId(1L, 1L)).thenReturn(Optional.empty());
+        when(likeApartRepository.findByUserIdAndApartId(1L, 1L)).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> likeService.likeOrUnlike(user, 1L, ContentTypeEnum.APART_TYPE));
         verify(likeApartRepository, times(1)).save(any(LikeApart.class));
+    }
+
+    @Test
+    void likeOrUnlike_Apart_AlreadyLiked() {
+        User user = new User();
+        user.setId(1L);
+        Apart apart = new Apart();
+        apart.setId(1L);
+        apart.setUser(user);
+
+        when(likeApartRepository.findByUserIdAndApartId(1L, 1L)).thenReturn(Optional.of(new LikeApart()));
+
+        assertThrows(SelfPostLikeException.class, () -> likeService.likeOrUnlike(user, 1L, ContentTypeEnum.APART_TYPE));
+        verify(likeApartRepository, never()).save(any());
     }
 
     @Test
@@ -62,40 +75,23 @@ class LikeServiceTest {
         qna.setQnaId(1L);
         qna.setUser(user);
 
-
-
-        when(qnARepository.findById(1L)).thenReturn(Optional.of(qna));
-        when(likeQnARepository.findByUserIdAndCommentId(1L, 1L)).thenReturn(Optional.empty());
+        when(likeQnARepository.findByUserIdAndId(1L, 1L)).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> likeService.likeOrUnlike(user, 1L, ContentTypeEnum.QNA_TYPE));
         verify(likeQnARepository, times(1)).save(any(LikeQnA.class));
     }
 
     @Test
-    void likeOrUnlike_Apart_SelfLike() {
-        User user = new User();
-        user.setId(1L);
-        Apart apart = new Apart();
-        apart.setId(1L);
-        apart.setUser(user);
-
-        when(apartRepository.findFirstById(1L)).thenReturn(Optional.of(apart));
-
-        assertThrows(SelfPostLikeException.class, () -> likeService.likeOrUnlike(user, 1L, ContentTypeEnum.APART_TYPE));
-    }
-
-    @Test
-    void likeOrUnlike_QnA_SelfLike() {
+    void likeOrUnlike_QnA_AlreadyLiked() {
         User user = new User();
         user.setId(1L);
         QnA qna = new QnA();
         qna.setQnaId(1L);
         qna.setUser(user);
 
-        when(qnARepository.findById(1L)).thenReturn(Optional.of(qna));
+        when(likeQnARepository.findByUserIdAndId(1L, 1L)).thenReturn(Optional.of(new LikeQnA()));
 
         assertThrows(SelfPostLikeException.class, () -> likeService.likeOrUnlike(user, 1L, ContentTypeEnum.QNA_TYPE));
+        verify(likeQnARepository, never()).save(any());
     }
-
-
 }
