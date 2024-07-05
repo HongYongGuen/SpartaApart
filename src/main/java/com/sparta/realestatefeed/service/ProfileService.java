@@ -39,7 +39,10 @@ public class ProfileService {
 
         Long likedApartCount = likeApartRepository.countByUserId(user.getId());
         Long likedQnACount = likeQnARepository.countByUserId(user.getId());
-        return new ProfileResponseDto(user);
+        ProfileResponseDto profileResponseDto = new ProfileResponseDto(user);
+        profileResponseDto.setLikedApartCount(likedApartCount);
+        profileResponseDto.setLikedQnACount(likedQnACount);
+        return profileResponseDto;
 
     }
 

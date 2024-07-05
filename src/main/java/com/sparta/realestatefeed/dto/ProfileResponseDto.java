@@ -2,14 +2,16 @@ package com.sparta.realestatefeed.dto;
 
 import com.sparta.realestatefeed.entity.User;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class ProfileResponseDto {
     String userName;
     String nickName;
     String email;
     String info;
-    Long likedApartCount; // 내가 좋아요한 게시글 수
+    Long likedApartCount;
     Long likedQnACount;
 
     public ProfileResponseDto(User user) {
