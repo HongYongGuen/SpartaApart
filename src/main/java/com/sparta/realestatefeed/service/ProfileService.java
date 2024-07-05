@@ -5,6 +5,8 @@ import com.sparta.realestatefeed.dto.ProfileRequestDto;
 import com.sparta.realestatefeed.dto.ProfileResponseDto;
 import com.sparta.realestatefeed.entity.User;
 import com.sparta.realestatefeed.exception.PasswordMismatchException;
+import com.sparta.realestatefeed.repository.LikeApartRepository;
+import com.sparta.realestatefeed.repository.LikeQnARepository;
 import com.sparta.realestatefeed.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,8 +21,13 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final LikeQnARepository likeQnARepository;
+    private final LikeApartRepository likeApartRepository;
 
-    public ProfileService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+
+    public ProfileService(UserRepository userRepository, PasswordEncoder passwordEncoder, LikeQnARepository likeQnARepository, LikeApartRepository likeApartRepository) {
+        this.likeQnARepository = likeQnARepository;
+        this.likeApartRepository = likeApartRepository;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
@@ -29,6 +36,9 @@ public class ProfileService {
         User user = userRepository.findByUserName(userName).orElseThrow(
                 () -> new IllegalArgumentException("해당 유저는 존재하지 않습니다.")
         );
+
+        Long likedApartCount = likeApartRepository.countByUserId(user.getId());
+        Long likedQnACount = likeQnARepository.countByUserId(user.getId());
         return new ProfileResponseDto(user);
 
     }
@@ -44,7 +54,6 @@ public class ProfileService {
         userRepository.save(user);
 
         return new ProfileResponseDto(user);
-
 
     }
 

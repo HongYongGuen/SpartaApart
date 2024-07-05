@@ -14,4 +14,6 @@ public interface LikeApartRepository extends JpaRepository<LikeApart, Long> {
     Optional<LikeApart> findByUserIdAndId(Long userId, Long contentId) ;
 
 
+    @Query("SELECT COUNT(l) FROM LikeApart l WHERE l.user.id = :userId")
+    Long countByUserId(Long userId);
 }
